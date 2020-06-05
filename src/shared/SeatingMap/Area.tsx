@@ -1,6 +1,5 @@
 import React from 'react';
 import classnames from 'classnames';
-import Tooltip from '@material-ui/core/Tooltip';
 
 import { SeatArea, SeatRows, SeatType, Seat } from '../../models';
 import classes from './index.module.scss';
@@ -18,6 +17,7 @@ const layoutConfig = {
   borderRadius: 10,
   itemSize: 40,
   gap: 10,
+  axesGap: 20,
 };
 
 const AccessibleIcon: React.FC<{ type: SeatType }> = ({ type }) => (type === 'wheelchair' || type === 'wheelchair-companion')
@@ -47,6 +47,7 @@ const RowNames: React.FC<{ rows: SeatRows[]; left: number }> = ({ rows, left }) 
     {rows.map(row => (
       <text
         key={row.rowIndex}
+        className={classes.rowName}
         x="0"
         y={(layoutConfig.itemSize + layoutConfig.gap) / 2 + layoutConfig.itemSize * row.rowIndex + layoutConfig.gap * row.rowIndex}
       >
@@ -67,30 +68,29 @@ const RowSeats: React.FC<AreaProps> = ({ seats, select, unavailableSeats, status
             const x = layoutConfig.itemSize * seat.columnIndex + layoutConfig.gap * seat.columnIndex;
 
             return (
-              <Tooltip placement="top" title={seat.seatType} key={seat.columnIndex} arrow>
-                <g
-                  className={classnames(classes.seat, {
-                    [classes.soldSeat]: unavailableSeats?.[row.rowIndex]?.[seat.columnIndex] === 'sold',
-                    [classes.selectedSeat]: statuses?.[row.rowIndex]?.[seat.columnIndex]?.select,
-                  })}
-                  onClick={() => select('select', !statuses?.[row.rowIndex]?.[seat.columnIndex]?.select, seat, row)}
-                  transform={`translate(${x}, ${y})`}
-                >
-                  <path
-                    className={classes.seatBackground}
-                    d={`
-                      M${0},${layoutConfig.itemSize}
-                      v-${layoutConfig.itemSize - layoutConfig.borderRadius}
-                      q0,-${layoutConfig.borderRadius} ${layoutConfig.borderRadius},-${layoutConfig.borderRadius}
-                      h${layoutConfig.itemSize - layoutConfig.borderRadius * 2}
-                      q${layoutConfig.borderRadius},0 ${layoutConfig.borderRadius},${layoutConfig.borderRadius}
-                      v${layoutConfig.itemSize - layoutConfig.borderRadius}
-                      z
-                    `}
-                  />
-                  <AccessibleIcon type={seat.seatType} />
-                </g>
-              </Tooltip>
+              <g
+                key={seat.columnIndex}
+                className={classnames(classes.seat, {
+                  [classes.soldSeat]: unavailableSeats?.[row.rowIndex]?.[seat.columnIndex] === 'sold',
+                  [classes.selectedSeat]: statuses?.[row.rowIndex]?.[seat.columnIndex]?.select,
+                })}
+                onClick={() => select('select', !statuses?.[row.rowIndex]?.[seat.columnIndex]?.select, seat, row)}
+                transform={`translate(${x}, ${y})`}
+              >
+                <path
+                  className={classes.seatBackground}
+                  d={`
+                    M${0},${layoutConfig.itemSize}
+                    v-${layoutConfig.itemSize - layoutConfig.borderRadius}
+                    q0,-${layoutConfig.borderRadius} ${layoutConfig.borderRadius},-${layoutConfig.borderRadius}
+                    h${layoutConfig.itemSize - layoutConfig.borderRadius * 2}
+                    q${layoutConfig.borderRadius},0 ${layoutConfig.borderRadius},${layoutConfig.borderRadius}
+                    v${layoutConfig.itemSize - layoutConfig.borderRadius}
+                    z
+                  `}
+                />
+                <AccessibleIcon type={seat.seatType} />
+              </g>
             );
           })}
         </g>
@@ -101,9 +101,12 @@ const RowSeats: React.FC<AreaProps> = ({ seats, select, unavailableSeats, status
 
 const SeatingMapArea: React.FC<AreaProps> = ({ seats, select, statuses, unavailableSeats }) => (
   <>
-    <RowNames rows={seats.rows} left={-20} />
+    <RowNames rows={seats.rows} left={-layoutConfig.axesGap - 8} />
     <RowSeats seats={seats} select={select} statuses={statuses} unavailableSeats={unavailableSeats} />
-    <RowNames rows={seats.rows} left={layoutConfig.itemSize * seats.columnCount + layoutConfig.gap * seats.columnCount} />
+    <RowNames
+      rows={seats.rows}
+      left={layoutConfig.itemSize * seats.columnCount + layoutConfig.gap * seats.columnCount - layoutConfig.gap + layoutConfig.axesGap}
+    />
   </>
 );
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import classnames from 'classnames';
+import { fromEvent, merge, of, Observable, timer } from 'rxjs';
+import { debounceTime, switchMap } from 'rxjs/operators';
 
 import { SeatZoneArea, ZonedSeatsAttributtes, SeatZoneAttributtes, Seat, SeatRows } from '../../models';
 
@@ -20,12 +22,9 @@ const SeatingMap: React.FC<SeatingMapProps> = ({ zones, seats, unavailableSeats 
   const [rendered, setRenderedStatus] = useState<boolean>(false);
   const [statuses, setStatuses] = useState<SeatingMapActions>({});
 
-  const prepareChart = () => {
+  const setViewBox = () => {
     const svg = d3.select(containerRef.current!);
-    const mainGroup = svg.select('g');
-    const visibleAreaSize = 320;
     const groupSizes = containerRef.current!.getBBox();
-    const containerSizes = containerRef.current!.getBoundingClientRect();
 
     svg.attr('viewBox', [
       -groupSizes.width * 0.1,
@@ -33,7 +32,14 @@ const SeatingMap: React.FC<SeatingMapProps> = ({ zones, seats, unavailableSeats 
       groupSizes.width * 1.2,
       groupSizes.height * 1.2,
     ] as any);
+  };
 
+  const subscribeOnZoom$ = () => {
+    const svg = d3.select(containerRef.current!);
+    const mainGroup = svg.select('g');
+    const groupSizes = containerRef.current!.getBBox();
+    const containerSizes = containerRef.current!.getBoundingClientRect();
+    const visibleAreaSize = 320;
     const maxScale = groupSizes.width > containerSizes.width || groupSizes.height > containerSizes.height
       ? Math.max(groupSizes.width, groupSizes.height) / visibleAreaSize
       : 1;
@@ -46,18 +52,35 @@ const SeatingMap: React.FC<SeatingMapProps> = ({ zones, seats, unavailableSeats 
         ])
         .scaleExtent([1, maxScale])
         .on('zoom', () => mainGroup.attr('transform', d3.event.transform)),
-    )
-      .on('dblclick.zoom', null);
+    ).on('dblclick.zoom', null);
+
+    // Only unsubscribe
+    return new Observable(() => () => svg.on('.zoom', null));
   };
 
   useEffect(() => {
     if ((!zones || !seats)) {
       setRenderedStatus(false);
-      return;
+      return () => undefined;
     }
 
-    prepareChart();
+    setViewBox();
     setRenderedStatus(true);
+
+    const listenEvents$ = () => merge(
+      fromEvent(window, 'resize'),
+      of(true),
+    ).pipe(
+      debounceTime(200),
+      // Timer to make sure that we successfully remove old zoom event
+      switchMap(() => timer(0).pipe(
+        switchMap(() => subscribeOnZoom$()),
+      )),
+    );
+
+    const unsubscriber = listenEvents$().subscribe();
+
+    return () => unsubscriber.unsubscribe();
   }, [zones, seats]);
 
   if (!zones || !seats) {
