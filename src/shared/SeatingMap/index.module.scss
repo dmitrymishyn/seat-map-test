@@ -1,0 +1,40 @@
+.svg {
+  width: 100%;
+  height: 100%;
+}
+
+.mainGroup {
+  opacity: 0;
+}
+
+.mainGroupRendered {
+  opacity: 1;
+}
+
+.seat {
+  cursor: pointer;
+  path, circle {
+    fill: currentColor;
+  }
+}
+
+.soldSeat {
+  cursor: not-allowed;
+}
+
+.seatBackground {
+  color: #C5CEE6;
+}
+
+.selectedSeat .seatBackground {
+  color: #4E1DE4;
+}
+
+.soldSeat .seatBackground {
+  color: #6E7DA2;
+}
+
+.selectedSeat .infograph,
+.soldSeat .infograph {
+  color: #fff;
+}
