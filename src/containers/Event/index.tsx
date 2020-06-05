@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
+import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Observable, combineLatest } from 'rxjs';
 import { switchMap, pluck, tap } from 'rxjs/operators';
+
+import classes from './index.module.scss';
 
 import {
   ZonedSeatsAttributtes,
@@ -16,6 +19,7 @@ import {
 import SeatingMap from '../../shared/SeatingMap';
 import { UnavailableRowSeats } from '../../models/UnavailableSeats';
 import { fetchEventInfo$, get$ } from '../../api';
+
 
 const parseUrl = (url: string) => url.replace('https://api.inventory.dev.external.hollywood.com/', '/');
 
@@ -63,10 +67,14 @@ const Event: React.FC = () => {
     );
   }, []);
 
-  switch (status) {
-    case 'error': return (<div>Something was broken</div>);
-    case 'pending': return (<CircularProgress />);
-    default: break;
+  if (status !== 'completed') {
+    return (
+      <div className={classes.pendingOrErrorContainer}>
+        { status === 'pending'
+          ? <CircularProgress />
+          : <Typography color="textSecondary" variant="subtitle1">Something was broken</Typography>}
+      </div>
+    );
   }
 
   return (
