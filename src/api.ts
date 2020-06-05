@@ -16,7 +16,7 @@ const request$ = <T extends object>(
   method,
   body,
   headers: {
-    'x-api-key': 'j6iUdH86ty5FhJTcjNs5g3J47xiiauUy75o961O6',
+    'x-api-key': process.env.REACT_APP_API_KEY,
   },
 }).pipe(
   map(response => onlyResponse ? response.response as T : response as T),
