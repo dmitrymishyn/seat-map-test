@@ -8,7 +8,7 @@ export type Seat = {
   seatType: SeatType;
 };
 
-export type SeatRows = {
+export type SeatRow = {
   rowIndex: number;
   rowName: string;
   rowSeats: Seat[];
@@ -18,7 +18,7 @@ export type SeatArea = {
   areaIndex: number;
   rowCount: number;
   columnCount: number;
-  rows: SeatRows[];
+  rows: SeatRow[];
 };
 
 export type SeatZonesEntityResponse = {

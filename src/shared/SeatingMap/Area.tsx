@@ -1,26 +1,19 @@
 import React from 'react';
 import classnames from 'classnames';
 
-import { SeatArea, SeatRows, SeatType, Seat } from '../../models';
+import { SeatArea, SeatRow, SeatType, Seat } from '../../models';
 import classes from './index.module.scss';
 import { UnavailableRowSeats } from '../../models/UnavailableSeats';
-import { SeatingMapActions } from './models';
+import { SeatingMapActions, layoutConfig } from './models';
 
 type AreaProps = {
   seats: SeatArea;
   unavailableSeats: UnavailableRowSeats | null;
-  select: (name: string, value: any, seat: Seat, row: SeatRows) => void;
+  select: (name: string, value: any, seat: Seat, row: SeatRow) => void;
   statuses: SeatingMapActions;
 };
 
-const layoutConfig = {
-  borderRadius: 10,
-  itemSize: 40,
-  gap: 10,
-  axesGap: 20,
-};
-
-const AccessibleIcon: React.FC<{ type: SeatType }> = ({ type }) => (type === 'wheelchair' || type === 'wheelchair-companion')
+const SeatIcon: React.FC<{ type: SeatType }> = ({ type }) => (type === 'wheelchair' || type === 'wheelchair-companion')
   ? (
     <g transform="translate(3,10)" className={classes.infograph}>
       <circle cx="12" cy="4" r="2" className={classes.infograph} />
@@ -42,7 +35,7 @@ const AccessibleIcon: React.FC<{ type: SeatType }> = ({ type }) => (type === 'wh
   )
   : null;
 
-const RowNames: React.FC<{ rows: SeatRows[]; left: number }> = ({ rows, left }) => (
+const RowNames: React.FC<{ rows: SeatRow[]; left: number }> = ({ rows, left }) => (
   <g transform={`translate(${left},0)`}>
     {rows.map(row => (
       <text
@@ -89,7 +82,11 @@ const RowSeats: React.FC<AreaProps> = ({ seats, select, unavailableSeats, status
                     z
                   `}
                 />
-                <AccessibleIcon type={seat.seatType} />
+                {
+                  statuses?.[row.rowIndex]?.[seat.columnIndex]?.select
+                    ? <text className={classes.seatName} x={seat.seatName.length > 1 ? 8 : 15} y="28">{seat.seatName}</text>
+                    : <SeatIcon type={seat.seatType} />
+                }
               </g>
             );
           })}
@@ -99,15 +96,22 @@ const RowSeats: React.FC<AreaProps> = ({ seats, select, unavailableSeats, status
   </g>
 );
 
-const SeatingMapArea: React.FC<AreaProps> = ({ seats, select, statuses, unavailableSeats }) => (
-  <>
-    <RowNames rows={seats.rows} left={-layoutConfig.axesGap - 8} />
-    <RowSeats seats={seats} select={select} statuses={statuses} unavailableSeats={unavailableSeats} />
-    <RowNames
-      rows={seats.rows}
-      left={layoutConfig.itemSize * seats.columnCount + layoutConfig.gap * seats.columnCount - layoutConfig.gap + layoutConfig.axesGap}
-    />
-  </>
-);
+const SeatingMapArea: React.FC<AreaProps> = ({ seats, select, statuses, unavailableSeats }) => {
+  const columnCount = Math.max(
+    ...seats.rows.map(({ rowSeats }) =>
+      Math.max(...rowSeats.map(({ columnIndex }) => columnIndex + 1))),
+  );
+
+  return (
+    <>
+      <RowNames rows={seats.rows} left={-layoutConfig.axes.gap - layoutConfig.axes.width} />
+      <RowSeats seats={seats} select={select} statuses={statuses} unavailableSeats={unavailableSeats} />
+      <RowNames
+        rows={seats.rows}
+        left={layoutConfig.itemSize * columnCount + layoutConfig.gap * columnCount - layoutConfig.gap + layoutConfig.axes.gap}
+      />
+    </>
+  );
+};
 
 export default SeatingMapArea;

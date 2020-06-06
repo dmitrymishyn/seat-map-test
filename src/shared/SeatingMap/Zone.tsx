@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SeatZoneArea, ZonedSeatsAttributtes, SeatZoneAttributtes, Seat, SeatRows } from '../../models';
+import { SeatZoneArea, ZonedSeatsAttributtes, SeatZoneAttributtes, Seat, SeatRow } from '../../models';
 
 import classes from './index.module.scss';
 import { UnavailableRowSeats } from '../../models/UnavailableSeats';
@@ -12,7 +12,7 @@ type ZoneProps = {
   seats: ZonedSeatsAttributtes;
   statuses: SeatingMapActions;
   unavailableSeats: UnavailableRowSeats | null;
-  select: (name: string, value: any, seat: Seat, row: SeatRows, area: SeatZoneArea, zone: SeatZoneAttributtes) => void;
+  select: (name: string, value: any, seat: Seat, row: SeatRow, area: SeatZoneArea, zone: SeatZoneAttributtes) => void;
 };
 
 const SeatingMapZone: React.FC<ZoneProps> = ({ zone, seats, select, statuses, unavailableSeats }) => (

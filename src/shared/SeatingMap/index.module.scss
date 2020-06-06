@@ -42,3 +42,15 @@
 .rowName {
   font: 14px/16px Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
+
+.seatName {
+  fill: #fff;
+  font: 20px Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+}
+
+.scene path {
+  fill: none;
+  stroke-width: 6px;
+  stroke: #1DB87A;
+}
