@@ -65,6 +65,7 @@ const RowSeats: React.FC<AreaProps> = ({ seats, select, unavailableSeats, status
                 key={seat.columnIndex}
                 className={classnames(classes.seat, {
                   [classes.soldSeat]: unavailableSeats?.[row.rowIndex]?.[seat.columnIndex] === 'sold',
+                  [classes.lockedSeat]: unavailableSeats?.[row.rowIndex]?.[seat.columnIndex] === 'locked',
                   [classes.selectedSeat]: statuses?.[row.rowIndex]?.[seat.columnIndex]?.select,
                 })}
                 onClick={() => select('select', !statuses?.[row.rowIndex]?.[seat.columnIndex]?.select, seat, row)}
